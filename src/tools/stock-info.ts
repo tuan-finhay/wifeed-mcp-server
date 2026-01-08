@@ -27,6 +27,11 @@ Args:
   - code (string): Vietnamese stock ticker symbol (e.g., HPG, VNM, TCB)
   - page (number): Page number for pagination (default: 1)
   - limit (number): Results per page (default: 20, max: 100)
+  - by_time ('created_at' | 'updated_at'): Filter by timestamp type
+  - from_date (string): Start date filter (YYYY-MM-DD)
+  - to_date (string): End date filter (YYYY-MM-DD)
+  - from_time (string): Start time filter (YYYY-MM-DD)
+  - to_time (string): End time filter (YYYY-MM-DD)
   - response_format ('markdown' | 'json'): Output format
 
 Returns:
@@ -69,6 +74,11 @@ Examples:
             code: params.code,
             page: params.page,
             limit: params.limit,
+            "by-time": params.by_time,
+            "from-date": params.from_date,
+            "to-date": params.to_date,
+            "from-time": params.from_time,
+            "to-time": params.to_time,
           }
         );
 

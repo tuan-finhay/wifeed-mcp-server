@@ -220,15 +220,47 @@ export interface FinancialRatios {
   updated_at: string;
 }
 
+// Real-time Financial Ratios (Chỉ số tài chính realtime)
+export interface RealtimeFinancialRatios {
+  code: string;
+  ep?: number;
+  graham_3?: number;
+  p_ocf?: number;
+  pb?: number;
+  pe?: number;
+  pe_dp?: number;
+  peg?: number;
+  peg_dc?: number;
+  vonhoa?: number;
+  updated_at?: string;
+}
+
 // Analysis Report (Báo cáo phân tích)
 export interface AnalysisReport {
   id: number;
   code: string;
+  mack?: string;  // Stock code in Vietnamese
   title: string;
+  tenbaocao?: string;  // Report title in Vietnamese
   source: string;
+  nguon?: string;  // Source in Vietnamese
   type: number;
   publish_date: string;
   file_url: string;
+  filebaocao?: string;  // Original report file link
+  // Recommendation fields
+  khuyennghi?: string;  // Recommendation: Mua, Khác, Trung lập
+  giamuctieu?: number;  // Target price
+  giamuctieu_dieuchinrh?: number;  // Adjusted target price
+  upside_hientai?: number;  // Current upside
+  // Forecast fields
+  lnst_duphong?: number;  // Net profit forecast year n
+  lnst_duphong_n1?: number;  // Net profit forecast year n+1
+  lnst_duphong_n2?: number;  // Net profit forecast year n+2
+  doanhthu_duphong?: number;  // Revenue forecast year n
+  doanhthu_duphong_n1?: number;  // Revenue forecast year n+1
+  doanhthu_duphong_n2?: number;  // Revenue forecast year n+2
+  pe_mack_n0?: number;  // Forward P/E
   created_at: string;
   updated_at: string;
 }

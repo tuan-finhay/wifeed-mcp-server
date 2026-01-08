@@ -4,10 +4,12 @@ import {
   BalanceSheetInputSchema,
   CashFlowStatementInputSchema,
   FinancialRatiosInputSchema,
+  RealtimeFinancialRatiosInputSchema,
   type IncomeStatementInput,
   type BalanceSheetInput,
   type CashFlowStatementInput,
   type FinancialRatiosInput,
+  type RealtimeFinancialRatiosInput,
 } from "../schemas/index.js";
 import { ResponseFormat, ReportType } from "../constants.js";
 import {
@@ -20,6 +22,7 @@ import type {
   BalanceSheet,
   CashFlowStatement,
   FinancialRatios,
+  RealtimeFinancialRatios,
 } from "../types.js";
 
 export function registerFinancialStatementTools(server: McpServer): void {
@@ -547,7 +550,11 @@ This tool retrieves key financial ratios including valuation, profitability, and
 
 Args:
   - code (string): Vietnamese stock ticker symbol
-  - type ('quarter' | 'year' | 'ttm'): Report period type (TTM = trailing twelve months)
+  - type ('quarter' | 'year' | 'ttm' | 'daily'): Report period type
+  - from_date (string): Start date filter (required for daily type, format: YYYY-MM-DD)
+  - to_date (string): End date filter (format: YYYY-MM-DD)
+  - quy (number): Quarter number 1-4 (for quarterly reports)
+  - nam (number): Year (for quarterly/yearly reports)
   - response_format ('markdown' | 'json'): Output format
 
 Returns financial ratios including:
@@ -560,7 +567,8 @@ Returns financial ratios including:
 
 Examples:
   - "Get TTM financial ratios for VNM" -> code="VNM", type="ttm"
-  - "Get quarterly ratios for TCB" -> code="TCB", type="quarter"`,
+  - "Get Q3 2024 ratios for TCB" -> code="TCB", type="quarter", quy=3, nam=2024
+  - "Get daily ratios for HPG" -> code="HPG", type="daily", from_date="2024-01-01"`,
       inputSchema: FinancialRatiosInputSchema,
       annotations: {
         readOnlyHint: true,
@@ -577,6 +585,10 @@ Examples:
           {
             code: params.code,
             type: params.type,
+            "from-date": params.from_date,
+            "to-date": params.to_date,
+            quy: params.quy,
+            nam: params.nam,
           }
         );
 
@@ -698,6 +710,120 @@ Examples:
             {
               type: "text",
               text: `Error fetching financial ratios: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+        };
+      }
+    }
+  );
+
+  // Real-time Financial Ratios Tool
+  server.registerTool(
+    "wifeed_get_realtime_financial_ratios",
+    {
+      title: "Get Real-time Financial Ratios",
+      description: `Get real-time financial ratios (chỉ số tài chính realtime) for Vietnamese stocks.
+
+This tool retrieves current valuation ratios for multiple stocks at once.
+
+Args:
+  - codes (string): Comma-separated stock ticker symbols (e.g., AAA,BVH,VNM)
+  - response_format ('markdown' | 'json'): Output format
+
+Returns real-time valuation data including:
+  - P/E ratio (pe)
+  - P/B ratio (pb)
+  - PEG ratio (peg, peg_dc adjusted)
+  - P/OCF ratio (p_ocf)
+  - E/P ratio (ep)
+  - Graham Number (graham_3)
+  - Market cap (vonhoa)
+
+Examples:
+  - "Get real-time P/E for VNM and TCB" -> codes="VNM,TCB"
+  - "Compare valuation ratios for bank stocks" -> codes="TCB,VCB,MBB,ACB"`,
+      inputSchema: RealtimeFinancialRatiosInputSchema,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async (params: RealtimeFinancialRatiosInput) => {
+      try {
+        const client = getApiClient();
+        const response = await client.request<RealtimeFinancialRatios[]>(
+          "/tai-chinh-doanh-nghiep/v2/chi-so-tai-chinh-realtime",
+          {
+            code: params.codes.toUpperCase(),
+          }
+        );
+
+        if (!response || response.length === 0) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `No real-time financial ratios found for ${params.codes}.`,
+              },
+            ],
+          };
+        }
+
+        const output = {
+          count: response.length,
+          data: response.map((item) => ({
+            code: item.code,
+            pe: item.pe,
+            pb: item.pb,
+            peg: item.peg,
+            peg_adjusted: item.peg_dc,
+            p_ocf: item.p_ocf,
+            ep: item.ep,
+            pe_forecast: item.pe_dp,
+            graham_number: item.graham_3,
+            market_cap: item.vonhoa,
+          })),
+        };
+
+        if (params.response_format === ResponseFormat.JSON) {
+          return {
+            content: [{ type: "text", text: JSON.stringify(output, null, 2) }],
+            structuredContent: output,
+          };
+        }
+
+        // Markdown format
+        const formatRatio = (val: number | undefined): string => {
+          if (val === undefined || val === null) return "N/A";
+          return val.toFixed(2);
+        };
+
+        let markdown = `# Real-time Financial Ratios\n\n`;
+        markdown += `| Stock | P/E | P/B | PEG | P/OCF | E/P | Market Cap |\n`;
+        markdown += `|-------|-----|-----|-----|-------|-----|------------|\n`;
+
+        for (const item of response) {
+          markdown += `| ${item.code} `;
+          markdown += `| ${formatRatio(item.pe)} `;
+          markdown += `| ${formatRatio(item.pb)} `;
+          markdown += `| ${formatRatio(item.peg)} `;
+          markdown += `| ${formatRatio(item.p_ocf)} `;
+          markdown += `| ${formatRatio(item.ep)} `;
+          markdown += `| ${formatCurrency(item.vonhoa)} |\n`;
+        }
+
+        return {
+          content: [{ type: "text", text: truncateResponse(markdown) }],
+        };
+      } catch (error) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: "text",
+              text: `Error fetching real-time financial ratios: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
         };

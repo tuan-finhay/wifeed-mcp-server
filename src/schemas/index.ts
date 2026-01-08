@@ -16,6 +16,15 @@ export const StockCodeSchema = z
   .toUpperCase()
   .describe("Vietnamese stock ticker symbol (e.g., VNM, HPG, TCB)");
 
+export const DateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+  .describe("Date in YYYY-MM-DD format");
+
+export const ByTimeSchema = z
+  .enum(["created_at", "updated_at"])
+  .describe("Filter by created_at or updated_at timestamp");
+
 export const PageSchema = z
   .number()
   .int()
@@ -62,6 +71,11 @@ export const InsiderTradingInputSchema = z.object({
   code: StockCodeSchema,
   page: PageSchema,
   limit: LimitSchema,
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at"),
+  from_date: DateSchema.optional().describe("Start date filter (YYYY-MM-DD)"),
+  to_date: DateSchema.optional().describe("End date filter (YYYY-MM-DD)"),
+  from_time: DateSchema.optional().describe("Start time filter (YYYY-MM-DD)"),
+  to_time: DateSchema.optional().describe("End time filter (YYYY-MM-DD)"),
   response_format: ResponseFormatSchema,
 }).strict();
 
@@ -96,6 +110,19 @@ export const CashFlowStatementInputSchema = z.object({
 export const FinancialRatiosInputSchema = z.object({
   code: StockCodeSchema,
   type: ReportTypeSchema,
+  from_date: DateSchema.optional().describe("Start date filter (required for daily type)"),
+  to_date: DateSchema.optional().describe("End date filter"),
+  quy: QuarterSchema.optional().describe("Quarter number (for quarterly reports)"),
+  nam: YearSchema.optional().describe("Year (for quarterly/yearly reports)"),
+  response_format: ResponseFormatSchema,
+}).strict();
+
+// Real-time Financial Ratios
+export const RealtimeFinancialRatiosInputSchema = z.object({
+  codes: z
+    .string()
+    .min(1, "At least one stock code is required")
+    .describe("Comma-separated stock ticker symbols (e.g., AAA,BVH,VNM)"),
   response_format: ResponseFormatSchema,
 }).strict();
 
@@ -104,8 +131,8 @@ export const AnalysisReportsInputSchema = z.object({
   code: StockCodeSchema.optional().describe("Stock code to filter reports (optional)"),
   type: z
     .nativeEnum(AnalysisReportType)
-    .default(AnalysisReportType.ALL)
-    .describe("Report type: 1 for all, 2 for industry, 3 for company"),
+    .default(AnalysisReportType.COMPANY)
+    .describe("Report type: 1=Company, 2=Industry, 3=Macro, 4=Strategy"),
   page: PageSchema,
   limit: LimitSchema,
   from_date: z
@@ -125,6 +152,11 @@ export const AnalysisReportsInputSchema = z.object({
 export const PolicyInterestRateInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema,
+  by_time: ByTimeSchema.optional(),
+  from_date: DateSchema.optional().describe("Start date filter (min: 2020-01-01)"),
+  to_date: DateSchema.optional().describe("End date filter"),
+  from_time: DateSchema.optional().describe("Start time filter"),
+  to_time: DateSchema.optional().describe("End time filter"),
   response_format: ResponseFormatSchema,
 }).strict();
 
@@ -132,6 +164,11 @@ export const PolicyInterestRateInputSchema = z.object({
 export const InterbankRateInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema,
+  by_time: ByTimeSchema.optional(),
+  from_date: DateSchema.optional().describe("Start date filter (min: 2018-01-01)"),
+  to_date: DateSchema.optional().describe("End date filter"),
+  from_time: DateSchema.optional().describe("Start time filter"),
+  to_time: DateSchema.optional().describe("End time filter"),
   response_format: ResponseFormatSchema,
 }).strict();
 
@@ -139,6 +176,11 @@ export const InterbankRateInputSchema = z.object({
 export const DepositRateByGroupInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema,
+  by_time: ByTimeSchema.optional(),
+  from_date: DateSchema.optional().describe("Start date filter (min: 2018-01-01)"),
+  to_date: DateSchema.optional().describe("End date filter"),
+  from_time: DateSchema.optional().describe("Start time filter"),
+  to_time: DateSchema.optional().describe("End time filter"),
   response_format: ResponseFormatSchema,
 }).strict();
 
@@ -149,8 +191,13 @@ export const DepositRateByBankInputSchema = z.object({
     .int()
     .min(1, "Term must be at least 1 month")
     .max(36, "Term cannot exceed 36 months")
-    .describe("Deposit term in months (e.g., 1, 3, 6, 12)"),
+    .describe("Deposit term in months (e.g., 1, 3, 6, 9, 12, 24)"),
   limit: LimitSchema.default(100),
+  by_time: ByTimeSchema.optional(),
+  from_date: DateSchema.optional().describe("Start date filter (min: 2018-01-01)"),
+  to_date: DateSchema.optional().describe("End date filter"),
+  from_time: DateSchema.optional().describe("Start time filter"),
+  to_time: DateSchema.optional().describe("End time filter"),
   response_format: ResponseFormatSchema,
 }).strict();
 
@@ -158,6 +205,11 @@ export const DepositRateByBankInputSchema = z.object({
 export const ExchangeRateInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema.default(100),
+  by_time: ByTimeSchema.optional(),
+  from_date: DateSchema.optional().describe("Start date filter"),
+  to_date: DateSchema.optional().describe("End date filter"),
+  from_time: DateSchema.optional().describe("Start time filter"),
+  to_time: DateSchema.optional().describe("End time filter"),
   response_format: ResponseFormatSchema,
 }).strict();
 
@@ -168,7 +220,11 @@ export const InternationalCommodityInputSchema = z.object({
   data_type: z
     .nativeEnum(CommodityDataType)
     .default(CommodityDataType.VALUE_TODAY)
-    .describe("Data type: value_today, change_1d, change_mtd, change_ytd"),
+    .describe("Data type: value_today, change_today, diff_day, diff_month, diff_year"),
+  by_time: ByTimeSchema.optional(),
+  from_date: DateSchema.optional().describe("Start date filter (min: 2018-01-01)"),
+  to_date: DateSchema.optional().describe("End date filter"),
+  from_time: DateSchema.optional().describe("Start time filter"),
   response_format: ResponseFormatSchema,
 }).strict();
 
@@ -179,7 +235,9 @@ export const DomesticCommodityInputSchema = z.object({
   data_type: z
     .nativeEnum(CommodityDataType)
     .default(CommodityDataType.VALUE_TODAY)
-    .describe("Data type: value_today, change_1d, change_mtd, change_ytd"),
+    .describe("Data type: value_today, change_today, diff_day, diff_month, diff_year"),
+  by_time: ByTimeSchema.optional(),
+  from_time: DateSchema.optional().describe("Start time filter"),
   response_format: ResponseFormatSchema,
 }).strict();
 
@@ -187,12 +245,18 @@ export const DomesticCommodityInputSchema = z.object({
 export const OtherExchangeRateInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema.default(100),
+  by_time: ByTimeSchema.optional(),
+  from_date: DateSchema.optional().describe("Start date filter"),
+  to_date: DateSchema.optional().describe("End date filter"),
+  from_time: DateSchema.optional().describe("Start time filter"),
+  to_time: DateSchema.optional().describe("End time filter"),
   response_format: ResponseFormatSchema,
 }).strict();
 
 // Type exports
 export type InsiderTradingInput = z.infer<typeof InsiderTradingInputSchema>;
 export type IncomeStatementInput = z.infer<typeof IncomeStatementInputSchema>;
+export type RealtimeFinancialRatiosInput = z.infer<typeof RealtimeFinancialRatiosInputSchema>;
 export type BalanceSheetInput = z.infer<typeof BalanceSheetInputSchema>;
 export type CashFlowStatementInput = z.infer<typeof CashFlowStatementInputSchema>;
 export type FinancialRatiosInput = z.infer<typeof FinancialRatiosInputSchema>;

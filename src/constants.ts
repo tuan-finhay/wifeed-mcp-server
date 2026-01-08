@@ -10,7 +10,8 @@ export const CHARACTER_LIMIT = 50000;
 export enum ReportType {
   QUARTER = "quarter",
   YEAR = "year",
-  TTM = "ttm"
+  TTM = "ttm",
+  DAILY = "daily"
 }
 
 // Response formats
@@ -19,17 +20,19 @@ export enum ResponseFormat {
   MARKDOWN = "markdown"
 }
 
-// Analysis report types
+// Analysis report types (per API documentation)
 export enum AnalysisReportType {
-  ALL = 1,
-  INDUSTRY = 2,
-  COMPANY = 3
+  COMPANY = 1,    // Báo cáo doanh nghiệp
+  INDUSTRY = 2,   // Báo cáo ngành
+  MACRO = 3,      // Báo cáo vĩ mô
+  STRATEGY = 4    // Báo cáo chiến lược
 }
 
 // Commodity data types
 export enum CommodityDataType {
   VALUE_TODAY = "value_today",
-  CHANGE_1D = "change_1d",
-  CHANGE_MTD = "change_mtd",
-  CHANGE_YTD = "change_ytd"
+  CHANGE_TODAY = "change_today",
+  DIFF_DAY = "diff_day",
+  DIFF_MONTH = "diff_month",
+  DIFF_YEAR = "diff_year"
 }

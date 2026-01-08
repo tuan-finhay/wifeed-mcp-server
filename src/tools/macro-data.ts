@@ -48,20 +48,29 @@ export function registerMacroDataTools(server: McpServer): void {
       title: "Get Analysis Reports",
       description: `Get analysis reports (báo cáo phân tích) from Vietnamese securities companies.
 
-This tool retrieves research reports including industry analysis and company-specific reports.
+This tool retrieves research reports from over 40 securities companies including company-specific, industry, macro, and strategy reports.
 
 Args:
   - code (string, optional): Stock code to filter reports
-  - type (1 | 2 | 3): Report type - 1 for all, 2 for industry, 3 for company
+  - type (1 | 2 | 3 | 4): Report type - 1=Company, 2=Industry, 3=Macro, 4=Strategy
   - page (number): Page number (default: 1)
   - limit (number): Results per page (default: 20)
   - from_date (string): Filter from date (YYYY-MM-DD)
   - to_date (string): Filter to date (YYYY-MM-DD)
   - response_format ('markdown' | 'json'): Output format
 
+Returns report data including:
+  - Report title and source
+  - Recommendation (Mua/Buy, Trung lập/Neutral, etc.)
+  - Target price and upside potential
+  - Revenue and profit forecasts
+  - Forward P/E ratio
+
 Examples:
-  - "Get recent analysis reports for TPB" -> code="TPB", type=3
-  - "Get industry reports from last month" -> type=2, from_date="2024-11-01"`,
+  - "Get recent analysis reports for TPB" -> code="TPB", type=1
+  - "Get industry reports from last month" -> type=2, from_date="2024-11-01"
+  - "Get macro economic reports" -> type=3
+  - "Get strategy reports" -> type=4`,
       inputSchema: AnalysisReportsInputSchema,
       annotations: {
         readOnlyHint: true,
@@ -104,12 +113,23 @@ Examples:
           limit: params.limit,
           reports: data.map((item) => ({
             id: item.id,
-            code: item.code,
-            title: item.title,
-            source: item.source,
+            code: item.code || item.mack,
+            title: item.title || item.tenbaocao,
+            source: item.source || item.nguon,
             type: item.type,
             publish_date: item.publish_date,
-            file_url: item.file_url,
+            file_url: item.file_url || item.filebaocao,
+            recommendation: item.khuyennghi,
+            target_price: item.giamuctieu,
+            target_price_adjusted: item.giamuctieu_dieuchinrh,
+            upside: item.upside_hientai,
+            net_profit_forecast: item.lnst_duphong,
+            net_profit_forecast_n1: item.lnst_duphong_n1,
+            net_profit_forecast_n2: item.lnst_duphong_n2,
+            revenue_forecast: item.doanhthu_duphong,
+            revenue_forecast_n1: item.doanhthu_duphong_n1,
+            revenue_forecast_n2: item.doanhthu_duphong_n2,
+            forward_pe: item.pe_mack_n0,
           })),
         };
 
@@ -121,15 +141,40 @@ Examples:
         }
 
         // Markdown format
+        const getTypeLabel = (type: number): string => {
+          switch (type) {
+            case 1: return "🏢 Company";
+            case 2: return "🏭 Industry";
+            case 3: return "📊 Macro";
+            case 4: return "📈 Strategy";
+            default: return "📋 Report";
+          }
+        };
+
         let markdown = `# Analysis Reports\n\n`;
         markdown += `**Total:** ${output.total} reports | **Page:** ${output.page}\n\n`;
 
         for (const report of data) {
-          const typeLabel = report.type === 2 ? "🏭 Industry" : report.type === 3 ? "🏢 Company" : "📊 General";
-          markdown += `## ${typeLabel} - ${report.title}\n`;
-          markdown += `**Code:** ${report.code || "N/A"} | **Source:** ${report.source}\n`;
+          const typeLabel = getTypeLabel(report.type);
+          markdown += `## ${typeLabel} - ${report.title || report.tenbaocao}\n`;
+          markdown += `**Code:** ${report.code || report.mack || "N/A"} | **Source:** ${report.source || report.nguon}\n`;
           markdown += `**Date:** ${formatDate(report.publish_date)}\n`;
-          markdown += `**Download:** [PDF](${report.file_url})\n\n`;
+
+          if (report.khuyennghi) {
+            markdown += `**Recommendation:** ${report.khuyennghi}\n`;
+          }
+          if (report.giamuctieu) {
+            markdown += `**Target Price:** ${formatNumber(report.giamuctieu)}`;
+            if (report.upside_hientai) {
+              markdown += ` (Upside: ${report.upside_hientai.toFixed(1)}%)`;
+            }
+            markdown += `\n`;
+          }
+          if (report.pe_mack_n0) {
+            markdown += `**Forward P/E:** ${report.pe_mack_n0.toFixed(2)}\n`;
+          }
+
+          markdown += `**Download:** [PDF](${report.file_url || report.filebaocao})\n\n`;
           markdown += `---\n\n`;
         }
 
@@ -189,6 +234,11 @@ Examples:
           {
             page: params.page,
             limit: params.limit,
+            "by-time": params.by_time,
+            "from-date": params.from_date,
+            "to-date": params.to_date,
+            "from-time": params.from_time,
+            "to-time": params.to_time,
           }
         );
 
@@ -299,6 +349,11 @@ Examples:
           {
             page: params.page,
             limit: params.limit,
+            "by-time": params.by_time,
+            "from-date": params.from_date,
+            "to-date": params.to_date,
+            "from-time": params.from_time,
+            "to-time": params.to_time,
           }
         );
 
@@ -405,6 +460,11 @@ Examples:
           {
             page: params.page,
             limit: params.limit,
+            "by-time": params.by_time,
+            "from-date": params.from_date,
+            "to-date": params.to_date,
+            "from-time": params.from_time,
+            "to-time": params.to_time,
           }
         );
 
@@ -495,6 +555,11 @@ Examples:
           {
             ky_han: params.ky_han,
             limit: params.limit,
+            "by-time": params.by_time,
+            "from-date": params.from_date,
+            "to-date": params.to_date,
+            "from-time": params.from_time,
+            "to-time": params.to_time,
           }
         );
 
@@ -596,6 +661,11 @@ Examples:
           {
             page: params.page,
             limit: params.limit,
+            "by-time": params.by_time,
+            "from-date": params.from_date,
+            "to-date": params.to_date,
+            "from-time": params.from_time,
+            "to-time": params.to_time,
           }
         );
 
@@ -719,6 +789,10 @@ Examples:
             page: params.page,
             limit: params.limit,
             data_type: params.data_type,
+            "by-time": params.by_time,
+            "from-date": params.from_date,
+            "to-date": params.to_date,
+            "from-time": params.from_time,
           }
         );
 
@@ -841,6 +915,8 @@ Examples:
             page: params.page,
             limit: params.limit,
             data_type: params.data_type,
+            "by-time": params.by_time,
+            "from-time": params.from_time,
           }
         );
 
@@ -966,6 +1042,11 @@ Examples:
           {
             page: params.page,
             limit: params.limit,
+            "by-time": params.by_time,
+            "from-date": params.from_date,
+            "to-date": params.to_date,
+            "from-time": params.from_time,
+            "to-time": params.to_time,
           }
         );
 
