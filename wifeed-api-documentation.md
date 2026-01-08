@@ -428,36 +428,6 @@ GET /api/demo/v2/chi-so-tai-chinh?company_type=3
 
 ---
 
-##### 1.3.5 Real-time Financial Ratios (v2)
-
-**Endpoint:**
-```
-GET /tai-chinh-doanh-nghiep/v2/chi-so-tai-chinh-realtime
-```
-
-**Parameters:**
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `code` | string | ✅ Yes | Stock ticker symbols (comma-separated, e.g., AAA,BVH) |
-| `apikey` | string | ✅ Yes | API key |
-
-**Response Fields:**
-
-| Field | Description |
-|-------|-------------|
-| `ep` | E/P |
-| `graham_3` | Graham 3 (Sử dụng EPS và giá trị sổ sách) |
-| `p_ocf` | P/OCF |
-| `pb` | P/B |
-| `pe` | P/E |
-| `pe_dp` | P/E (dự phòng) |
-| `peg` | PEG |
-| `peg_dc` | PEG (điều chỉnh) |
-| `vonhoa` | Vốn hóa |
-
----
-
 ### 2. Money Market (Thị Trường Tiền Tệ)
 
 #### 2.1 Policy Interest Rates (Lãi Suất Chính Sách)
