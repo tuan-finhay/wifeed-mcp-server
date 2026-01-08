@@ -23,7 +23,7 @@ export const DateSchema = z
 
 export const ByTimeSchema = z
   .enum(["created_at", "updated_at"])
-  .describe("Filter by created_at or updated_at timestamp");
+  .describe("Filter by created_at or updated_at timestamp. IMPORTANT: When using by-time, you must also provide from-time and to-time parameters");
 
 export const PageSchema = z
   .number()
@@ -71,7 +71,7 @@ export const InsiderTradingInputSchema = z.object({
   code: StockCodeSchema,
   page: PageSchema,
   limit: LimitSchema,
-  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at"),
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at (requires from_time and to_time)"),
   from_date: DateSchema.optional().describe("Start date filter (YYYY-MM-DD)"),
   to_date: DateSchema.optional().describe("End date filter (YYYY-MM-DD)"),
   from_time: DateSchema.optional().describe("Start time filter (YYYY-MM-DD)"),
@@ -143,7 +143,7 @@ export const AnalysisReportsInputSchema = z.object({
 export const PolicyInterestRateInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema,
-  by_time: ByTimeSchema.optional(),
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at (requires from_time and to_time)"),
   from_date: DateSchema.optional().describe("Start date filter (min: 2020-01-01)"),
   to_date: DateSchema.optional().describe("End date filter"),
   from_time: DateSchema.optional().describe("Start time filter"),
@@ -155,7 +155,7 @@ export const PolicyInterestRateInputSchema = z.object({
 export const InterbankRateInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema,
-  by_time: ByTimeSchema.optional(),
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at (requires from_time and to_time)"),
   from_date: DateSchema.optional().describe("Start date filter (min: 2018-01-01)"),
   to_date: DateSchema.optional().describe("End date filter"),
   from_time: DateSchema.optional().describe("Start time filter"),
@@ -167,7 +167,7 @@ export const InterbankRateInputSchema = z.object({
 export const DepositRateByGroupInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema,
-  by_time: ByTimeSchema.optional(),
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at (requires from_time and to_time)"),
   from_date: DateSchema.optional().describe("Start date filter (min: 2018-01-01)"),
   to_date: DateSchema.optional().describe("End date filter"),
   from_time: DateSchema.optional().describe("Start time filter"),
@@ -184,7 +184,7 @@ export const DepositRateByBankInputSchema = z.object({
     .max(36, "Term cannot exceed 36 months")
     .describe("Deposit term in months (e.g., 1, 3, 6, 9, 12, 24)"),
   limit: LimitSchema.default(100),
-  by_time: ByTimeSchema.optional(),
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at (requires from_time and to_time)"),
   from_date: DateSchema.optional().describe("Start date filter (min: 2018-01-01)"),
   to_date: DateSchema.optional().describe("End date filter"),
   from_time: DateSchema.optional().describe("Start time filter"),
@@ -196,7 +196,7 @@ export const DepositRateByBankInputSchema = z.object({
 export const ExchangeRateInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema.default(100),
-  by_time: ByTimeSchema.optional(),
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at (requires from_time and to_time)"),
   from_date: DateSchema.optional().describe("Start date filter"),
   to_date: DateSchema.optional().describe("End date filter"),
   from_time: DateSchema.optional().describe("Start time filter"),
@@ -212,7 +212,7 @@ export const InternationalCommodityInputSchema = z.object({
     .nativeEnum(CommodityDataType)
     .default(CommodityDataType.VALUE_TODAY)
     .describe("Data type: value_today, change_today, diff_day, diff_month, diff_year"),
-  by_time: ByTimeSchema.optional(),
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at (requires from_time and to_time)"),
   from_date: DateSchema.optional().describe("Start date filter (min: 2018-01-01)"),
   to_date: DateSchema.optional().describe("End date filter"),
   from_time: DateSchema.optional().describe("Start time filter"),
@@ -227,7 +227,7 @@ export const DomesticCommodityInputSchema = z.object({
     .nativeEnum(CommodityDataType)
     .default(CommodityDataType.VALUE_TODAY)
     .describe("Data type: value_today, change_today, diff_day, diff_month, diff_year"),
-  by_time: ByTimeSchema.optional(),
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at (requires from_time and to_time)"),
   from_time: DateSchema.optional().describe("Start time filter"),
   response_format: ResponseFormatSchema,
 }).strict();
@@ -236,7 +236,7 @@ export const DomesticCommodityInputSchema = z.object({
 export const OtherExchangeRateInputSchema = z.object({
   page: PageSchema,
   limit: LimitSchema.default(100),
-  by_time: ByTimeSchema.optional(),
+  by_time: ByTimeSchema.optional().describe("Filter by created_at or updated_at (requires from_time and to_time)"),
   from_date: DateSchema.optional().describe("Start date filter"),
   to_date: DateSchema.optional().describe("End date filter"),
   from_time: DateSchema.optional().describe("Start time filter"),

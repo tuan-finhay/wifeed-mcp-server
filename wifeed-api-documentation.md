@@ -61,9 +61,9 @@ https://wifeed.vn/api/thong-tin-co-phieu/giao-dich...?apikey=YOUR_API_KEY&code=V
 | `nam` | integer | No | Year (e.g., 2024) |
 | `page` | integer | No | Page number for pagination (default: 1) |
 | `limit` | integer | No | Number of records per page (max: 100) |
-| `by-time` | string | No | Filter by `created_at` or `updated_at` |
-| `from-time` | string | No | Start datetime filter |
-| `to-time` | string | No | End datetime filter |
+| `by-time` | string | No | Filter by `created_at` or `updated_at`. **⚠️ Requires `from-time` and `to-time`** |
+| `from-time` | string | No | Start datetime filter (required when using `by-time`) |
+| `to-time` | string | No | End datetime filter (required when using `by-time`) |
 | `from-date` | string | No | Start date filter (format: `yyyy-mm-dd`) |
 | `to-date` | string | No | End date filter (format: `yyyy-mm-dd`) |
 
