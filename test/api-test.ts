@@ -93,7 +93,12 @@ async function runApiTests() {
   await test("fetches interbank rates with by_time filter", async () => {
     const response = await client.request<any[]>(
       "/du-lieu-vimo/lai-suat/lien-ngan-hang",
-      { "by-time": "updated_at", limit: 5 }
+      {
+        "by-time": "updated_at",
+        "from-time": "2024-01-01",
+        "to-time": "2024-12-31",
+        limit: 5
+      }
     );
     if (!response || response.length === 0) {
       throw new Error("No data returned");
