@@ -62,7 +62,6 @@ src/
 - `wifeed_get_balance_sheet` - Balance sheet
 - `wifeed_get_cash_flow` - Cash flow statement
 - `wifeed_get_financial_ratios` - Financial ratios (P/E, ROE, etc.) - supports daily/quarter/year/ttm
-- `wifeed_get_realtime_financial_ratios` - Real-time valuation ratios for multiple stocks
 
 ### Analysis
 - `wifeed_get_analysis_reports` - Research reports (Company/Industry/Macro/Strategy)

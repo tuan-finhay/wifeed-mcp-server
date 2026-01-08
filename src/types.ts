@@ -220,21 +220,6 @@ export interface FinancialRatios {
   updated_at: string;
 }
 
-// Real-time Financial Ratios (Chỉ số tài chính realtime)
-export interface RealtimeFinancialRatios {
-  code: string;
-  ep?: number;
-  graham_3?: number;
-  p_ocf?: number;
-  pb?: number;
-  pe?: number;
-  pe_dp?: number;
-  peg?: number;
-  peg_dc?: number;
-  vonhoa?: number;
-  updated_at?: string;
-}
-
 // Analysis Report (Báo cáo phân tích)
 export interface AnalysisReport {
   id: number;

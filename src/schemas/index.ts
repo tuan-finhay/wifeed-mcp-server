@@ -117,15 +117,6 @@ export const FinancialRatiosInputSchema = z.object({
   response_format: ResponseFormatSchema,
 }).strict();
 
-// Real-time Financial Ratios
-export const RealtimeFinancialRatiosInputSchema = z.object({
-  codes: z
-    .string()
-    .min(1, "At least one stock code is required")
-    .describe("Comma-separated stock ticker symbols (e.g., AAA,BVH,VNM)"),
-  response_format: ResponseFormatSchema,
-}).strict();
-
 // Analysis Reports
 export const AnalysisReportsInputSchema = z.object({
   code: StockCodeSchema.optional().describe("Stock code to filter reports (optional)"),
@@ -256,7 +247,6 @@ export const OtherExchangeRateInputSchema = z.object({
 // Type exports
 export type InsiderTradingInput = z.infer<typeof InsiderTradingInputSchema>;
 export type IncomeStatementInput = z.infer<typeof IncomeStatementInputSchema>;
-export type RealtimeFinancialRatiosInput = z.infer<typeof RealtimeFinancialRatiosInputSchema>;
 export type BalanceSheetInput = z.infer<typeof BalanceSheetInputSchema>;
 export type CashFlowStatementInput = z.infer<typeof CashFlowStatementInputSchema>;
 export type FinancialRatiosInput = z.infer<typeof FinancialRatiosInputSchema>;
